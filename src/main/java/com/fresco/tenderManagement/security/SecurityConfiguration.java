@@ -33,7 +33,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**", "/login", "/bidding/hi").permitAll()
+                        .requestMatchers("/h2-console/**", "/login").permitAll()
                         .requestMatchers("/bidding/add").hasAuthority("BIDDER")
                         .requestMatchers("/bidding/update/**").hasAuthority("APPROVER")
                         .requestMatchers("/bidding/list", "/bidding/delete/**").hasAnyAuthority("BIDDER", "APPROVER")
@@ -43,9 +43,6 @@ public class SecurityConfiguration {
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // Fix for H2 console frame options
-        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         return http.build();
     }
@@ -60,11 +57,11 @@ public class SecurityConfiguration {
         return config.getAuthenticationManager();
     }
 
-    @Bean
+   /* @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(loginService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
-    }
+    }*/
 }

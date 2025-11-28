@@ -20,135 +20,91 @@ import com.fresco.tenderManagement.repository.UserRepository;
 
 @Service
 public class BiddingService {
-
-    @Autowired
-    UserRepository urepo;
-
     @Autowired
     private BiddingRepository biddingRepository;
-
     @Autowired
     private UserService userService;
 
+    //1. ADD BIDDING
     public ResponseEntity<Object> postBidding(BiddingModel biddingModel) {
-            UserModel userModel = userService.getUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-            biddingModel.setBidderId(userModel.getId());
-            biddingModel.setDateOfBidding(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        UserModel userModel = userService.getUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
+        biddingModel.setBidderId(userModel.getId());
+        biddingModel.setDateOfBidding(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+        biddingRepository.save(biddingModel);
 
-            biddingRepository.save(biddingModel);
-            return new ResponseEntity<>(biddingModel, HttpStatus.CREATED);
-  
+        return new ResponseEntity<>(biddingModel, HttpStatus.CREATED); // Returns 201 Created
     }
 
-    public ResponseEntity<Object> getBidding(double bidAmount) {
 
+    //2.  LIST BIDDING (by amount greater than)
+    public ResponseEntity<Object> getBidding(double bidAmount) {
         List<BiddingModel> results = biddingRepository.findByBidAmountGreaterThan(bidAmount);
+
         if (results.isEmpty()) {
             return new ResponseEntity<>("No data available", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(results, HttpStatus.OK);
-
-        
     }
 
-
-
-
-
+    //3. UPDATE BIDDING (only approver)
     public ResponseEntity<Object> updateBidding(int id, BiddingModel model) {
+        BiddingModel bidding = biddingRepository.findById(id).orElse(null);
 
-            BiddingModel bidding = biddingRepository.findById(id).orElse(null);
-
-            if (bidding == null) {
-                return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
-            }   
-            bidding.setStatus(model.getStatus());
-            biddingRepository.save(bidding);
-            return new ResponseEntity<>(bidding, HttpStatus.OK);
-    
-    }
-
-    public ResponseEntity<Object> deleteBidding(int id) {
-    
-            BiddingModel bidding = biddingRepository.findById(id).orElse(null);
-
-            if (bidding == null) {
-                return new ResponseEntity<>("Not found", HttpStatus.BAD_REQUEST);
-            }
-
-            String email = getCurrentUserEmail();
-            UserModel user = userService.getUserByEmail(email);
-
-            if ("APPROVER".equals(user.getRole().getRolename()) || bidding.getBidderId() == user.getId()) {
-                biddingRepository.delete(bidding);
-                return new ResponseEntity<>("Deleted successfully", HttpStatus.NO_CONTENT);
-            } else {
-                return new ResponseEntity<>("You don’t have permission", HttpStatus.FORBIDDEN);
-            }
-    
-    }
-
-    private String getCurrentUserEmail() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
+        if (bidding == null) {
+            return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
         }
-        return null;
+
+        bidding.setStatus(model.getStatus());
+        biddingRepository.save(bidding);
+
+        return new ResponseEntity<>(bidding, HttpStatus.OK);
     }
 
-    private String getCurrentDate() {
-        return new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+    //4. DELETE BIDDING (approver can delete any, bidder can delete own)
+    public ResponseEntity<Object> deleteBidding(int id)
+    {
+        BiddingModel bidding = biddingRepository.findById(id).orElse(null);
+
+        if (bidding == null) {
+            return new ResponseEntity<>("Not found", HttpStatus.BAD_REQUEST);
+        }
+
+        // Get current user
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserModel user = userService.getUserByEmail(email);
+
+        // Check permission: APPROVER or creator BIDDER
+        if ("APPROVER".equals(user.getRole().getRolename()) || bidding.getBidderId() == user.getId()) {
+            biddingRepository.delete(bidding);
+            return new ResponseEntity<>("Deleted successfully", HttpStatus.NO_CONTENT);
+        }
+
+        return new ResponseEntity<>("You don't have permission", HttpStatus.FORBIDDEN);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//     public ResponseEntity<Object> postBidding(BiddingModel biddingModel) {
-//          return null;
-//     }
-
-    // public ResponseEntity<Object> getBidding(double bidAmount) {
-    //      return null;
-    // }
-
-    // public ResponseEntity<Object> updateBidding(int id, BiddingModel model) {
-    //      return null;
-    // }
-
-    // public ResponseEntity<Object> deleteBidding(int id) {
-    //   return null;
-    // }
-
-  
 }
+/*
+
+//1. ADD BIDDING
+public ResponseEntity<Object> postBidding(BiddingModel biddingModel) {
+    // VALIDATION: Check for null or invalid values
+    if (biddingModel.getBiddingId() <= 0 ||
+            biddingModel.getBidAmount() == null || biddingModel.getBidAmount() <= 0 ||
+            biddingModel.getYearsToComplete() == null || biddingModel.getYearsToComplete() <= 0) {
+        return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+        UserModel userModel = userService.getUserByEmail(
+                SecurityContextHolder.getContext().getAuthentication().getName()
+        );
+        biddingModel.setBidderId(userModel.getId());
+        biddingModel.setDateOfBidding(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+
+        biddingRepository.save(biddingModel);
+        return new ResponseEntity<>(biddingModel, HttpStatus.CREATED);
+    } catch (Exception e) {
+        return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
+    }
+}
+*/
