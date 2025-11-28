@@ -1,6 +1,6 @@
 package com.fresco.tenderManagement.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class BiddingModel {
@@ -10,20 +10,20 @@ public class BiddingModel {
     private int id;
     @Column(unique = true)
     private int biddingId;
-    private final String projectName="Metro Phase V 2024";
+    private final String projectName = "Metro Phase V 2024";
     private Double bidAmount;
     private Double yearsToComplete;
     private String dateOfBidding;
-    private String status="pending";
+    private String status = "pending";
     private int bidderId;
 
-
-    //constructor
+    // constructor
 
     public BiddingModel() {
     }
 
-    public BiddingModel(int id, int biddingId, Double bidAmount, Double yearsToComplete, String dateOfBidding, String status, int bidderId) {
+    public BiddingModel(int id, int biddingId, Double bidAmount, Double yearsToComplete, String dateOfBidding,
+            String status, int bidderId) {
         this.id = id;
         this.biddingId = biddingId;
         this.bidAmount = bidAmount;
@@ -43,7 +43,7 @@ public class BiddingModel {
         this.status = status;
     }
 
-    //getters and setters
+    // getters and setters
 
     public int getId() {
         return id;
@@ -105,9 +105,7 @@ public class BiddingModel {
         this.bidderId = bidderId;
     }
 
-
-    //to-string
-
+    // to-string
 
     @Override
     public String toString() {

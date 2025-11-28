@@ -1,6 +1,6 @@
 package com.fresco.tenderManagement.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class RoleModel {
@@ -11,7 +11,7 @@ public class RoleModel {
     @Column(unique = true)
     private String rolename;
 
-    //constructors
+    // constructors
 
     public RoleModel() {
     }
@@ -29,7 +29,7 @@ public class RoleModel {
         this.rolename = rolename;
     }
 
-    //getters and setters
+    // getters and setters
 
     public int getId() {
         return id;
@@ -47,7 +47,7 @@ public class RoleModel {
         this.rolename = rolename;
     }
 
-    //to-string
+    // to-string
 
     @Override
     public String toString() {

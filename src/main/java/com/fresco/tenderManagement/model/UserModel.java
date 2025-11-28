@@ -1,11 +1,10 @@
 package com.fresco.tenderManagement.model;
 
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "Users")
-public class UserModel implements UserDetails{
+public class UserModel implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,13 +26,12 @@ public class UserModel implements UserDetails{
     private String password;
     @Column(name = "email", unique = true)
     private String email;
-    @OneToOne
+
+    @ManyToOne
     @JoinColumn(name = "role", referencedColumnName = "id")
     private RoleModel role;
 
-
-
-    //constructors
+    // constructors
 
     public UserModel() {
     }
@@ -62,13 +60,12 @@ public class UserModel implements UserDetails{
         this.role = role;
     }
 
-
     public UserModel(String password, String email) {
         this.password = password;
         this.email = email;
     }
 
-    //getters and setters
+    // getters and setters
 
     public int getId() {
         return id;
@@ -118,8 +115,7 @@ public class UserModel implements UserDetails{
         this.companyName = companyName;
     }
 
-    //to-string
-
+    // to-string
 
     @Override
     public String toString() {
@@ -136,7 +132,7 @@ public class UserModel implements UserDetails{
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role.getRolename()));
-       return authorities;
+        return authorities;
     }
 
     @Override

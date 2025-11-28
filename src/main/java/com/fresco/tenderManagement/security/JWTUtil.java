@@ -4,10 +4,12 @@ import com.fresco.tenderManagement.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +21,9 @@ public class JWTUtil {
     private static final long serialVersionUID = 654352132132L;
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours
 
-    private final String secretKey = "randomkey123";
+    // Key must be at least 512 bits (64 bytes) for HS512
+    private final String secret = "randomkey123randomkey123randomkey123randomkey123randomkey123randomkey123";
+    private final Key secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
     @Autowired
     private UserService userService;
@@ -38,7 +42,7 @@ public class JWTUtil {
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
     }
 
     private Boolean isTokenExpired(String token) {
@@ -58,7 +62,7 @@ public class JWTUtil {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, secretKey)
+                .signWith(secretKey, SignatureAlgorithm.HS512)
                 .compact();
     }
 

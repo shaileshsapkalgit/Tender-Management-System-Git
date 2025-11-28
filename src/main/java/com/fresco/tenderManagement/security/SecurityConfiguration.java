@@ -1,30 +1,27 @@
 package com.fresco.tenderManagement.security;
 
+import com.fresco.tenderManagement.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.fresco.tenderManagement.service.LoginService;
-
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration extends org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter {
+@EnableMethodSecurity(prePostEnabled = true)
+public class SecurityConfiguration {
 
     @Autowired
     private LoginService loginService;
@@ -32,31 +29,25 @@ public class SecurityConfiguration extends org.springframework.security.config.a
     @Autowired
     private AuthenticationFilter authFilter;
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(loginService).passwordEncoder(passwordEncoder());
-    }
-
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/h2-console/**", "/login");
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .authorizeRequests(requests -> requests
-                        .antMatchers("/bidding/hi").permitAll()
-                        .antMatchers("/bidding/add").hasAuthority("BIDDER")
-                        .antMatchers("/bidding/update/**").hasAuthority("APPROVER")
-                        .antMatchers("/bidding/list", "/bidding/delete/**").hasAnyAuthority("BIDDER", "APPROVER")
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/h2-console/**", "/login", "/bidding/hi").permitAll()
+                        .requestMatchers("/bidding/add").hasAuthority("BIDDER")
+                        .requestMatchers("/bidding/update/**").hasAuthority("APPROVER")
+                        .requestMatchers("/bidding/list", "/bidding/delete/**").hasAnyAuthority("BIDDER", "APPROVER")
                         .anyRequest().authenticated())
-                
-                .exceptionHandling(handling -> handling.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // Fix for H2 console frame options
+        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
+
+        return http.build();
     }
 
     @Bean
@@ -64,9 +55,16 @@ public class SecurityConfiguration extends org.springframework.security.config.a
         return new BCryptPasswordEncoder();
     }
 
-    @Override
     @Bean
-    protected AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(loginService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 }

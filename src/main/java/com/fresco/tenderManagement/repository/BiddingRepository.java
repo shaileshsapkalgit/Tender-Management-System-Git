@@ -2,7 +2,7 @@ package com.fresco.tenderManagement.repository;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -16,6 +16,4 @@ import com.fresco.tenderManagement.model.BiddingModel;
 public interface BiddingRepository extends JpaRepository<BiddingModel, Integer> {
     List<BiddingModel> findByBidAmountGreaterThan(double bidAmount);
 
-
-    
 }
