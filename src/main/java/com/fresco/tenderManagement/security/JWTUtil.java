@@ -22,11 +22,11 @@ public class JWTUtil {
     private final Key secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", userDetails.getAuthorities());
+       // Map<String, Object> claims = new HashMap<>();
+        //claims.put("roles", userDetails.getAuthorities());
 
         return Jwts.builder()
-                .setClaims(claims)
+                //.setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
