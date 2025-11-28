@@ -27,14 +27,19 @@ public class LoginService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
-       
-         List<GrantedAuthority> authorities = buildUserAuthority(user.getRole().getRolename());
-         UserDetails userDetails = buildUserForAuthentication(user, authorities);
-         return userDetails;
+
+        List<GrantedAuthority> authorities =
+                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getRolename()));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                authorities
+        );
 
     }
 
-
+/*
     private UserDetails buildUserForAuthentication(UserModel user, List<GrantedAuthority> authorities) {
         return new org.springframework.security.core.userdetails.User(
             user.getEmail(), 
@@ -47,7 +52,7 @@ public class LoginService implements UserDetailsService {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(userRole));
         return authorities;
-    }
+    }*/
 
     
 

@@ -34,14 +34,15 @@ public class LoginController {
                 new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword())
             );
 
-         
             UserDetails userDetails = loginService.loadUserByUsername(loginDTO.getEmail());
             String jwt = jwtUtil.generateToken(userDetails);
 
             Map<String, Object> response = new HashMap<>();
             response.put("jwt", jwt);
-            response.put("status", HttpStatus.OK.value());
-            return ResponseEntity.ok(response);
+            response.put("status", 200);
+
+            return new ResponseEntity<>(response,HttpStatus.OK);
+
         } catch (BadCredentialsException e) {
             return new ResponseEntity<>("Invalid credentials", HttpStatus.BAD_REQUEST);
         }
