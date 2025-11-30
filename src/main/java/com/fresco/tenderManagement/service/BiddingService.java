@@ -76,7 +76,7 @@ public class BiddingService {
 
         // Check permission: APPROVER or creator BIDDER
         if ("APPROVER".equals(user.getRole().getRolename()) || bidding.getBidderId() == user.getId()) {
-            biddingRepository.delete(bidding);
+            biddingRepository.deleteById(id);
             return new ResponseEntity<>("Deleted successfully", HttpStatus.NO_CONTENT);
         }
 
