@@ -22,20 +22,24 @@ public class LoginService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserModel user = userRepository.findByEmail(email);
- 
-        if (user == null) {
+
+        UserModel userModel = userRepository.findByEmail(email);
+        if (userModel != null)
+        {
+            List<GrantedAuthority> authorities = new ArrayList<>();
+
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority(userModel.getRole().getRolename());
+
+            authorities.add(authority);
+
+            return new org.springframework.security.core.userdetails.User(
+                    userModel.getEmail(),
+                    userModel.getPassword(),
+                    authorities
+            );
+        } else {
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
-
-        List<GrantedAuthority> authorities =
-                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getRolename()));
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                authorities
-        );
 
     }
 
