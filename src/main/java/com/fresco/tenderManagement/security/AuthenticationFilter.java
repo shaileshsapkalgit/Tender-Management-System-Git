@@ -37,18 +37,14 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             email = jwtUtil.getUsernameFromToken(jwt);
         }
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) // ->(टोकन रिकामे नाहीये && युजर अजून लॉगिन झालेला नाहीये.)
+        {
+            UserDetails userDetails = loginService.loadUserByUsername(email); //loginService ला सांगतोय->त्या ईमेलवरून डेटाबेस मधून त्या युजरची पूर्ण माहिती (Password, Role, इ.) काढून आण.
 
-            UserDetails userDetails = loginService.loadUserByUsername(email);
-
-            if (jwtUtil.validateToken(jwt, userDetails)) {
-
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails,
-                        null, userDetails.getAuthorities());
-
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(auth);
+            if (jwtUtil.validateToken(jwt, userDetails)) //->इथे आपण चेक करतो की हे टोकन खरे आहे का? ते एक्सपायर (Expired) झाले नाही ना? आणि ते याच युजरचे आहे ना?
+            {
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails,null, userDetails.getAuthorities());//आता आपल्याला खात्री पटली आहे की युजर बरोबर आहे. म्हणून आपण स्प्रिंग सिक्युरिटीसाठी एक "Official Authentication Object" (ओळखपत्र) बनवतो.<ID Card>
+                SecurityContextHolder.getContext().setAuthentication(auth); // आता पूर्ण ॲप्लिकेशनला समजते की "हा युजर आता अधिकृतपणे लॉगिन झाला आहे" आणि त्याला पुढे जाण्याची परवानगी मिळते.
             }
         }
 
