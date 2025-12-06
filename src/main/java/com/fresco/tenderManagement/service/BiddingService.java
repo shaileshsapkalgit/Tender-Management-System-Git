@@ -70,11 +70,8 @@ public class BiddingService {
             return new ResponseEntity<>("Not found", HttpStatus.BAD_REQUEST);
         }
 
-        // Get current user
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserModel user = userService.getUserByEmail(email);
+        UserModel user = userService.getUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        // Check permission: APPROVER or creator BIDDER
         if ("APPROVER".equals(user.getRole().getRolename()) || bidding.getBidderId() == user.getId()) {
             biddingRepository.deleteById(id);
             return new ResponseEntity<>("Deleted successfully", HttpStatus.NO_CONTENT);
