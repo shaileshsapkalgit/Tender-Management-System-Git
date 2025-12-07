@@ -26,8 +26,6 @@ public class UserModel implements UserDetails {
     private String password;
     @Column(name = "email", unique = true)
     private String email;
-
-    @ManyToOne
     @JoinColumn(name = "role", referencedColumnName = "id")
     private RoleModel role;
 

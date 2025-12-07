@@ -15,31 +15,32 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fresco.tenderManagement.model.BiddingModel;
 import com.fresco.tenderManagement.service.BiddingService;
 
-@RestController
+
 @RequestMapping("/bidding")
 public class BiddingController {
 
-    @Autowired
+
     private BiddingService biddingService;
 
     @PostMapping("/add")
-    public ResponseEntity<Object> postBidding(@RequestBody BiddingModel biddingModel) {
-        return biddingService.postBidding(biddingModel);
+    public ResponseEntity<Object> postBidding( BiddingModel biddingModel) {
+        return null;
     }
 
     @GetMapping("/list")
-    public ResponseEntity<Object> getBidding(@RequestParam double bidAmount) {
-        return biddingService.getBidding(bidAmount);
+    public ResponseEntity<Object> getBidding( double bidAmount) {
+        return null;
     }
 
     @PatchMapping("/update/{id}")
-    public ResponseEntity<Object> updateBidding(@PathVariable int id, @RequestBody BiddingModel biddingModel) {
-        return biddingService.updateBidding(id, biddingModel);
+    public ResponseEntity<Object> updateBidding( int id,  BiddingModel biddingModel) {
+        return null;
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Object> deleteBidding(@PathVariable int id) {
-        return biddingService.deleteBidding(id);
+    public ResponseEntity<Object> deleteBidding( int id)
+    {
+        return null;
     }
 
     @GetMapping("/hi")

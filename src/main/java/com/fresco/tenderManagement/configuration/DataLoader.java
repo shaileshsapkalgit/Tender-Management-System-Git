@@ -16,8 +16,7 @@ public class DataLoader implements ApplicationRunner {
 
     private final PasswordEncoder passwordEncoder;
 
-
-    @Autowired  
+    @Autowired
     private RoleRepository roleRepository;
 
     @Autowired
@@ -29,12 +28,25 @@ public class DataLoader implements ApplicationRunner {
 
     public void run(ApplicationArguments args) throws InterruptedException {
 
-        roleRepository.save(new RoleModel("BIDDER"));
-        roleRepository.save(new RoleModel("APPROVER"));
+        if (roleRepository.findByRolename("BIDDER") == null) {
+            roleRepository.save(new RoleModel("BIDDER"));
+        }
+        if (roleRepository.findByRolename("APPROVER") == null) {
+            roleRepository.save(new RoleModel("APPROVER"));
+        }
 
-        userRepository.save(new UserModel(1,"bidder1","companyOne",passwordEncoder.encode("bidder123$"),"bidderemail@gmail.com", new RoleModel(1)));
-        userRepository.save(new UserModel(2,"bidder2","companyTwo",passwordEncoder.encode("bidder789$"),"bidderemail2@gmail.com",new RoleModel(1)));
-        userRepository.save(new UserModel(3,"approver","defaultCompany",passwordEncoder.encode("approver123$"), "approveremail@gmail.com",new RoleModel(2)));
+        if (userRepository.findByEmail("bidderemail@gmail.com") == null) {
+            userRepository.save(new UserModel(0, "bidder1", "companyOne", passwordEncoder.encode("bidder123$"),
+                    "bidderemail@gmail.com", new RoleModel(1)));
+        }
+        if (userRepository.findByEmail("bidderemail2@gmail.com") == null) {
+            userRepository.save(new UserModel(0, "bidder2", "companyTwo", passwordEncoder.encode("bidder789$"),
+                    "bidderemail2@gmail.com", new RoleModel(1)));
+        }
+        if (userRepository.findByEmail("approveremail@gmail.com") == null) {
+            userRepository.save(new UserModel(0, "approver", "defaultCompany", passwordEncoder.encode("approver123$"),
+                    "approveremail@gmail.com", new RoleModel(2)));
+        }
     }
 
 }
